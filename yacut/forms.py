@@ -1,6 +1,7 @@
 """Формы приложения yacut."""
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import MultipleFileField, FileRequired
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, URL
 
@@ -47,7 +48,10 @@ class URLForm(FlaskForm):
                 'Предложенный вариант короткой ссылки уже существует.')
 
 
-class FileForm(FlaskForm):
+class UploadFileForm(FlaskForm):
     """Форма для загрузки файлов."""
 
-    pass
+    files = MultipleFileField(
+        'Выбрать файлы',
+        validators=[FileRequired()]
+    )
