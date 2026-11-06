@@ -30,7 +30,7 @@ class URLForm(FlaskForm):
     )
     submit = SubmitField('Создать')
 
-    def validate_custom_id(self, field):
+    def validate_custom_id(self, field) -> None:
         """Проверить вводимый короткий идентификатор ссылки."""
         if not field.data:
             return
@@ -53,5 +53,6 @@ class UploadFileForm(FlaskForm):
 
     files = MultipleFileField(
         'Выбрать файлы',
-        validators=[FileRequired()]
+        validators=[FileRequired(message='Файл не выбран')]
     )
+    submit = SubmitField('Загрузить')
