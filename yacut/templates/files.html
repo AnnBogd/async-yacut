@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+  <section class="container my-5 px-4">
+    <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+    <p class="text-center my-4">
+      Загрузите файлы и получите на них короткие ссылки
+    </p>
+
+    <div class="row justify-content-center my-3">
+      <div class="col-md-6">
+        <form method="POST" enctype="multipart/form-data" novalidate>
+          {{ form.csrf_token }}
+          {{ form.files(
+            class="form-control form-control-lg py-3 mb-3"
+          ) }}
+          {% if form.files.errors %}
+            <p class="text-danger">
+              {% for error in form.files.errors %}
+                {{ error }}
+              {% endfor %}
+            </p>
+          {% endif %}
+          {{ form.submit(class="btn btn-primary px-5 py-3") }}
+        </form>
+
+        {% if files_data %}
+          <ul class="list-unstyled mt-4">
+            {% for filename, short_link in files_data %}
+              <li class="d-flex justify-content-between align-items-center mb-2">
+                <span class="font-weight-bold">{{ filename }}</span>
+                <a href="{{ short_link }}">{{ short_link }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

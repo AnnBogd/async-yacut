@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<main>
+  <section class="container my-5 px-4">
+    <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+    <p class="text-center my-4">
+      Создайте короткую ссылку автоматически или предложите свой вариант
+    </p>
+    <div class="row justify-content-center my-3">
+      <div class="col-md-6">
+        <form method="POST" novalidate>
+          {{ form.csrf_token }}
+          {{ form.original_link(
+            class="form-control form-control-lg py-3 mb-3",
+            placeholder=form.original_link.label.text
+          ) }}
+          {{ form.custom_id(
+            class="form-control form-control-lg py-3 mb-3",
+            placeholder=form.custom_id.label.text
+          ) }}
+          {% if form.custom_id.errors %}
+            <p class="text-danger">
+              {% for error in form.custom_id.errors %}
+                {{ error }}
+              {% endfor %}
+            </p>
+          {% endif %}
+          {{ form.submit(class="btn btn-primary px-5 py-3") }}
+        </form>
+
+        {% if short_link %}
+          <p class="text-center fw-bold mt-4">
+            Ваша короткая ссылка готова:
+            <a href="{{ short_link }}">{{ short_link }}</a>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
