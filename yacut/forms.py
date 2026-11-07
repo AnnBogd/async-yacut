@@ -5,10 +5,9 @@ from flask_wtf.file import MultipleFileField, FileRequired
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Optional, URL
 
-from yacut import db
-from .constants import PATTERN, RESERVED
+from .constants import RESERVED
 from .error_handlers import InvalidShortLink
-from .models import URLMap
+from .support_func import is_short_ident_exists, is_short_ident_valid
 
 
 class URLForm(FlaskForm):
@@ -34,16 +33,11 @@ class URLForm(FlaskForm):
         """Проверить вводимый короткий идентификатор ссылки."""
         if not field.data:
             return
-        if not PATTERN.fullmatch(field.data):
+        if not is_short_ident_valid(field.data):
             raise InvalidShortLink(
                 'Указано недопустимое имя для короткой ссылки'
             )
-        if field.data.lower() in RESERVED:
-            raise InvalidShortLink(
-                'Указано недопустимое имя для короткой ссылки'
-            )
-        stmt = db.select(URLMap).where(URLMap.short == field.data)
-        if db.session.execute(stmt).scalar_one_or_none() is not None:
+        if field.data.lower() in RESERVED or is_short_ident_exists(field.data):
             raise InvalidShortLink(
                 'Предложенный вариант короткой ссылки уже существует.')
 

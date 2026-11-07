@@ -6,45 +6,34 @@
     <p class="text-center my-4">
       Создайте короткую ссылку автоматически или предложите свой вариант
     </p>
-    <div class="container">
-      <div class="row my-3">
-        <div class="col-sm"></div>
-        <div class="col-sm">
-          <form method="POST" novalidate>
-            {{ form.csrf_token }}
-            {{ form.original_link(
-              class="form-control form-control-lg py-3 mb-3",
-              placeholder=form.original_link.label.text
-            ) }}<br />
-            {{ form.custom_id(
-              class="form-control form-control-lg py-3 mb-3",
-              placeholder=form.custom_id.label.text
-            ) }}<br />
-            {% if form.custom_id.errors %}
-              <p class="text-danger">
-                {% for error in form.custom_id.errors %}
-                  {{ error }}
-                {% endfor %}
-              </p>
-            {% endif %}
-            {{ form.submit(class="button px-5 py-3 btn") }}
-          </form>
-          {% if short_link %}
-            <div class="container">
-              <div class="row">
-                <div class="col-sm"></div>
-                  <div class="col-sm">
-                    <p class="text-center">
-                      Ваша короткая ссылка готова:
-                      <a href="{{ short_link }}">{{ short_link }}</a>
-                    </p>
-                  </div>
-                <div class="col-sm"></div>
-              </div>
-            </div>
+    <div class="row justify-content-center my-3">
+      <div class="col-md-6">
+        <form method="POST" novalidate>
+          {{ form.csrf_token }}
+          {{ form.original_link(
+            class="form-control form-control-lg py-3 mb-3",
+            placeholder=form.original_link.label.text
+          ) }}
+          {{ form.custom_id(
+            class="form-control form-control-lg py-3 mb-3",
+            placeholder=form.custom_id.label.text
+          ) }}
+          {% if form.custom_id.errors %}
+            <p class="text-danger">
+              {% for error in form.custom_id.errors %}
+                {{ error }}
+              {% endfor %}
+            </p>
           {% endif %}
-        </div>
-        <div class="col-sm"></div>
+          {{ form.submit(class="btn btn-primary px-5 py-3") }}
+        </form>
+
+        {% if short_link %}
+          <p class="text-center fw-bold mt-4">
+            Ваша короткая ссылка готова:
+            <a href="{{ short_link }}">{{ short_link }}</a>
+          </p>
+        {% endif %}
       </div>
     </div>
   </section>

@@ -5,15 +5,15 @@ import asyncio
 import aiohttp
 import urllib
 
-from .constants import AUTH_HEADERS, REQUEST_UPLOAD_URL
+from .constants import AUTH_HEADERS, REQUEST_DOWNLOAD_URL, REQUEST_UPLOAD_URL
 
 
-async def upload_files(session, file):
-    """Загрузить файл на Яндекс диск."""
+async def upload_files(session, file) -> str:
+    """Загрузить файл на Яндекс диск и получить ссылку на скачивание."""
     async with session.get(
         REQUEST_UPLOAD_URL,
         params={
-            'path': f'/{file.filename}',
+            'path': f'app:/{file.filename}',   # noqa: E231
             'overwrite': 'True'
         },
         headers=AUTH_HEADERS
@@ -25,10 +25,20 @@ async def upload_files(session, file):
         response.raise_for_status()
         file_location = urllib.parse.unquote(response.headers.get('Location'))
     file_location = file_location.replace('/disk', '')
-    return file_location
+    async with session.get(
+        headers=AUTH_HEADERS,
+        url=REQUEST_DOWNLOAD_URL,
+        params={'path': file_location}
+    ) as response:
+        response.raise_for_status()
+        data = await response.json()
+        print(data)
+        download_link = data.get('href')
+        print(download_link)
+    return download_link
 
 
-async def async_upload_files(files):
+async def async_upload_files(files) -> list:
     """Создать сессию для загрузки файлов."""
     async with aiohttp.ClientSession() as session:
         tasks = [upload_files(session, file) for file in files]

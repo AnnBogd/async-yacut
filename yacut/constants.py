@@ -10,7 +10,7 @@ load_dotenv()
 
 API_HOST = 'https://cloud-api.yandex.net/'
 API_VERSION = 'v1'
-DISK_TOKEN = os.environ.get('DISK_TOKEN')
+DISK_TOKEN = os.getenv('DISK_TOKEN')
 AUTH_HEADERS = {
     'Authorization': f'OAuth {DISK_TOKEN}'
 }

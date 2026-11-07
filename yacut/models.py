@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from yacut import db
+from . import db
 
 
 class URLMap(db.Model):
