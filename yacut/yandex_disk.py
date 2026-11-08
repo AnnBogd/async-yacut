@@ -32,9 +32,7 @@ async def upload_files(session, file) -> str:
     ) as response:
         response.raise_for_status()
         data = await response.json()
-        print(data)
         download_link = data.get('href')
-        print(download_link)
     return download_link
 
 
