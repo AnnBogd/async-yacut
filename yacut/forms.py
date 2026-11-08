@@ -3,11 +3,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import MultipleFileField, FileRequired
 from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, Length, Optional, URL
+from wtforms.validators import DataRequired, Length, Optional, Regexp, URL
 
-from .constants import RESERVED
-from .error_handlers import InvalidShortLink
-from .support_func import is_short_ident_exists, is_short_ident_valid
+from .constants import FORM_PATTERN, MAX_SHORT_LEN, MIN_SHORT_LEN
 
 
 class URLForm(FlaskForm):
@@ -24,22 +22,14 @@ class URLForm(FlaskForm):
         'Ваш вариант короткой ссылки',
         validators=[
             Optional(),
-            Length(1, 16)
+            Length(MIN_SHORT_LEN, MAX_SHORT_LEN),
+            Regexp(
+                regex=FORM_PATTERN,
+                message='Указано недопустимое имя для короткой ссылки'
+            )
         ]
     )
     submit = SubmitField('Создать')
-
-    def validate_custom_id(self, field) -> None:
-        """Проверить вводимый короткий идентификатор ссылки."""
-        if not field.data:
-            return
-        if not is_short_ident_valid(field.data):
-            raise InvalidShortLink(
-                'Указано недопустимое имя для короткой ссылки'
-            )
-        if field.data.lower() in RESERVED or is_short_ident_exists(field.data):
-            raise InvalidShortLink(
-                'Предложенный вариант короткой ссылки уже существует.')
 
 
 class UploadFileForm(FlaskForm):

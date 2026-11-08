@@ -24,7 +24,7 @@ class APIError(Exception):
             self.status_code = status_code
 
     def to_dict(self) -> dict:
-        """Сериализацировать сообщения об ошибке."""
+        """Сериализовать сообщения об ошибке."""
         return dict(message=self.message)
 
 
