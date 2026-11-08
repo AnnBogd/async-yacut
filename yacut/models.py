@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 from random import choices
+from typing import Optional
 
 from .constants import LINK_ALPHABET, PATTERN, RESERVED
 from .error_handlers import InvalidShortLink
@@ -21,7 +22,7 @@ class URLMap(db.Model):
     )
 
     @staticmethod
-    def create(original_link: str, short_ident: str | None = None) -> str:
+    def create(original_link: str, short_ident: Optional[str] = None) -> str:
         """Создать и сохранить короткую ссылку.
 
         Проверяет short_ident, генерирует при необходимости,
