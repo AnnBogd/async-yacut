@@ -2,8 +2,9 @@
 
 from http import HTTPStatus
 
-from flask import jsonify, request, url_for
+from flask import jsonify, request
 
+from .constants import PATTERN
 from .models import get_url_map, URLMap
 from .error_handlers import APIError, InvalidShortLink
 from . import app
@@ -17,21 +18,22 @@ def add_url_map() -> tuple:
         raise APIError(message='Отсутствует тело запроса')
     if 'url' not in data:
         raise APIError(message='"url" является обязательным полем!')
+    short_ident = data.get('custom_id') or None
+    if short_ident is not None and not PATTERN.fullmatch(short_ident):
+        raise APIError('Указано недопустимое имя для короткой ссылки')
     try:
         url_map = URLMap.create(
             data.get('url'),
-            data.get('custom_id') or None
+            short_ident
         )
     except InvalidShortLink as error:
         raise APIError(message=str(error))
     response_data = url_map.to_dict()
-    short_link = url_for(
-        'redirect_from_short_link',
-        short_id=response_data.get('short'),
-        _external=True
-    )
     return (
-        jsonify(url=response_data.get('original'), short_link=short_link),
+        jsonify(
+            url=response_data.get('original'),
+            short_link=response_data.get('short_link')
+        ),
         HTTPStatus.CREATED
     )
 
@@ -41,6 +43,7 @@ def get_original_link(short_id) -> tuple:
     """Получить оригинальную ссылку по короткому идентификатору."""
     url_map = get_url_map(short_id)
     if url_map is None:
-        raise APIError(message='Указанный id не найден', status_code=404)
+        raise APIError(
+            message='Указанный id не найден', status_code=HTTPStatus.NOT_FOUND)
     response_data = url_map.to_dict()
     return jsonify(url=response_data.get('original')), HTTPStatus.OK

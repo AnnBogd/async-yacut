@@ -4,7 +4,14 @@ from datetime import datetime, timezone
 from random import choices
 from typing import Optional
 
-from .constants import LINK_ALPHABET, PATTERN, RESERVED
+from flask import url_for
+
+from .constants import (
+    LINK_ALPHABET,
+    MAX_SHORT_LEN,
+    RESERVED,
+    STANDARD_SHORT_LEN
+)
 from .error_handlers import InvalidShortLink
 from . import db
 
@@ -14,7 +21,11 @@ class URLMap(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text, nullable=False)
-    short = db.Column(db.String(16), unique=True, index=True, nullable=False)
+    short = db.Column(
+        db.String(MAX_SHORT_LEN),
+        unique=True,
+        index=True, nullable=False
+    )
     timestamp = db.Column(
         db.DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -22,27 +33,27 @@ class URLMap(db.Model):
     )
 
     @staticmethod
-    def create(original_link: str, short_ident: Optional[str] = None) -> str:
+    def is_short_valid(short_ident: str) -> bool:
+        """Проверить валидность короткого идентификатора."""
+        return (short_ident.lower() not in RESERVED
+                and get_url_map(short_ident) is None)
+
+    @staticmethod
+    def create(
+            original_link: str, short_ident: Optional[str] = None) -> 'URLMap':
         """Создать и сохранить короткую ссылку.
 
         Проверяет short_ident, генерирует при необходимости,
         сохраняет запись и возвращает короткий идентификатор.
         Бросает InvalidShortLink при проблемах.
         """
-        if short_ident is not None:
-            if not PATTERN.fullmatch(short_ident):
-                raise InvalidShortLink(
-                    'Указано недопустимое имя для короткой ссылки')
-            if (
-                short_ident.lower() in RESERVED
-                or get_url_map(short_ident) is not None
-            ):
-                raise InvalidShortLink(
-                    'Предложенный вариант короткой ссылки '
-                    'уже существует.'
-                )
-        else:
+        if short_ident is None:
             short_ident = get_unique_short_id()
+        elif not URLMap.is_short_valid(short_ident):
+            raise InvalidShortLink(
+                'Предложенный вариант короткой ссылки '
+                'уже существует.'
+            )
         new_url_map = URLMap(
             original=original_link,
             short=short_ident
@@ -57,7 +68,12 @@ class URLMap(db.Model):
             id=self.id,
             original=self.original,
             short=self.short,
-            timestamp=self.timestamp
+            timestamp=self.timestamp,
+            short_link=url_for(
+                'redirect_from_short_link',
+                short_id=self.short,
+                _external=True
+            )
         )
 
 
@@ -68,11 +84,9 @@ def get_url_map(short_ident: str) -> URLMap:
     ).scalar_one_or_none()
 
 
-def get_unique_short_id(link_len: int = 6) -> str:
+def get_unique_short_id(link_len: int = STANDARD_SHORT_LEN) -> str:
     """Сгенерировать случайную короткую ссылку."""
     while True:
         short_ident = ''.join(choices(LINK_ALPHABET, k=link_len))
-        if short_ident.lower() in RESERVED:
-            continue
-        if get_url_map(short_ident) is None:
+        if URLMap.is_short_valid(short_ident):
             return short_ident

@@ -3,7 +3,7 @@
 import asyncio
 
 import aiohttp
-from flask import Response, flash, redirect, render_template, url_for
+from flask import Response, flash, redirect, render_template
 
 from .constants import UPLOAD_FILES_URL
 from .forms import UploadFileForm, URLForm
@@ -28,14 +28,9 @@ def index_view() -> str:
         flash(str(error), 'danger')
         return render_template('index.html', form=form)
     response_data = url_map.to_dict()
-    short_link = url_for(
-        'redirect_from_short_link',
-        short_id=response_data.get('short'),
-        _external=True
-    )
     return render_template(
         'index.html',
-        short_link=short_link,
+        short_link=response_data.get('short_link'),
         form=form
     )
 
@@ -63,12 +58,7 @@ async def upload_files() -> str:
     for link in download_links:
         url_map = URLMap.create(link)
         response_data = url_map.to_dict()
-        short_link = url_for(
-            'redirect_from_short_link',
-            short_id=response_data.get('short'),
-            _external=True
-        )
-        short_links.append(short_link)
+        short_links.append(response_data.get('short_link'))
     files_data = list(zip(filenames, short_links))
     return render_template(
         'files.html',
