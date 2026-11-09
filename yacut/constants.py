@@ -15,6 +15,7 @@ AUTH_HEADERS = {
     'Authorization': f'OAuth {DISK_TOKEN}'
 }
 LINK_ALPHABET = ascii_letters + digits
+STANDARD_SHORT_LEN = 6
 MAX_SHORT_LEN = 16
 MIN_SHORT_LEN = 1
 PATTERN = re.compile(
