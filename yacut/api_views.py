@@ -5,7 +5,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from .constants import PATTERN
-from .models import get_url_map, URLMap
+from .models import URLMap
 from .error_handlers import APIError, InvalidShortLink
 from . import app
 
@@ -41,7 +41,7 @@ def add_url_map() -> tuple:
 @app.route('/api/id/<short_id>/', methods=['GET'])
 def get_original_link(short_id) -> tuple:
     """Получить оригинальную ссылку по короткому идентификатору."""
-    url_map = get_url_map(short_id)
+    url_map = URLMap.get_url_map(short_id)
     if url_map is None:
         raise APIError(
             message='Указанный id не найден', status_code=HTTPStatus.NOT_FOUND)
